@@ -7,74 +7,14 @@ return {
 			"nvim-neotest/nvim-nio",
 			"williamboman/mason.nvim",
 		},
+		event = "VeryLazy",
 		config = function()
 			local dap = require("dap")
 			local dapui = require("dapui")
 
-			--			require("dap").setup()
+			-- require("dap").setup()
 			require("dapui").setup()
 			require("nvim-dap-virtual-text").setup()
-
-			local bashdb_debugger = vim.fn.exepath("bashdb")
-			if bashdb_debugger ~= "" then
-				dap.adapters.bashdb = {
-					type = "executable",
-					command = vim.fn.stdpath("data") .. "/mason/packages/bash-debug-adapter/bash-debug-adapter",
-					name = "bashdb",
-				}
-
-				dap.configurations.sh = {
-					{
-						type = "bashdb",
-						request = "launch",
-						name = "Launch file",
-						showDebugOutput = true,
-						pathBashdb = vim.fn.stdpath("data")
-							.. "/mason/packages/bash-debug-adapter/extension/bashdb_dir/bashdb",
-						pathBashdbLib = vim.fn.stdpath("data")
-							.. "/mason/packages/bash-debug-adapter/extension/bashdb_dir",
-						trace = true,
-						file = "${file}",
-						program = "${file}",
-						cwd = "${workspaceFolder}",
-						pathCat = "cat",
-						pathBash = "/bin/bash",
-						pathMkfifo = "mkfifo",
-						pathPkill = "pkill",
-						-- args = {},
-						args = {},
-						argsString = "",
-						env = {},
-						terminalKind = "integrated",
-					},
-					{
-						type = "bashdb",
-						request = "launch",
-						name = "Launch with Arguments",
-						showDebugOutput = true,
-						pathBashdb = vim.fn.stdpath("data")
-							.. "/mason/packages/bash-debug-adapter/extension/bashdb_dir/bashdb",
-						pathBashdbLib = vim.fn.stdpath("data")
-							.. "/mason/packages/bash-debug-adapter/extension/bashdb_dir",
-						trace = true,
-						file = "${file}",
-						program = "${file}",
-						cwd = "${workspaceFolder}",
-						pathCat = "cat",
-						pathBash = "/bin/bash",
-						pathMkfifo = "mkfifo",
-						pathPkill = "pkill",
-						-- args = {},
-						args = function()
-							local usb = vim.fn.input("Enter USB name: ")
-							return { usb }
-						end,
-						argsString = "",
-						env = {},
-						terminalKind = "integrated",
-					},
-				}
-			end
 
 			vim.keymap.set("n", "<Leader>dt", dap.toggle_breakpoint, {})
 			vim.keymap.set("n", "<Leader>dc", dap.continue, {})
@@ -100,6 +40,20 @@ return {
 			dap.listeners.before.event_exited.dapui_config = function()
 				dapui.close()
 			end
+
+			-- local bash_adapter = require("sumod.plugins.debug_adapters.bash")
+			-- if bash_adapter and bash_adapter.setup then
+			-- 	bash_adapter.setup()
+			-- end
+
+			local function load_adapter(name)
+				local ok, adapter = pcall(require, "sumod.plugins.debug_adapters." .. name)
+				if ok and adapter and adapter.setup then
+					adapter.setup()
+				end
+			end
+
+			load_adapter("bash")
 		end,
 	},
 }
