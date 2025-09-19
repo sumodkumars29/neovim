@@ -54,6 +54,7 @@ return {
 			end
 
 			load_adapter("bash")
+			load_adapter("js_node")
 		end,
 	},
 }
